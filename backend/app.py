@@ -82,5 +82,6 @@ def leaks():
             excess = det.excess_flow(last["q"]) if (det and last and det.alarm) else 0.0
             out.append({"seg": e["seg"], "zone": s["zone"], "x_m": e["x"], "confidence": e["cf"], "households": s["households"],
                         "lat": s["lat1"] + f * (s["lat2"] - s["lat1"]), "lon": s["lon1"] + f * (s["lon2"] - s["lon1"]),
-                        "excess_m3h": round(excess, 3), "sujal_gaon_id": s["sujal_gaon_id"]})
+                        "excess_m3h": round(excess, 3), "loss_lpd": 0, "score": 0,
+                        "sujal_gaon_id": s["sujal_gaon_id"]})
     return priority.rank(out)

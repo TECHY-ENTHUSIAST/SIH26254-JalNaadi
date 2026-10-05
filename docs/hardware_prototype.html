@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JalNaadi · Hardware Prototype — SIH-26254</title>
+<style>
+  :root {
+    --navy: #1F4E79; --blue: #0070C0; --teal: #00796B; --red: #C01F1F;
+    --orange: #E65100; --green: #21A64F; --yellow: #F9A825;
+    --bg: #F0F4F8; --card: #ffffff; --text: #1a1a2e; --muted: #5a6a7a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, #0d3b6e 60%, #0070C0 100%);
+    color: #fff; padding: 18px 32px; display: flex; align-items: center; gap: 18px;
+    border-bottom: 3px solid var(--yellow);
+  }
+  .logo { font-size: 32px; }
+  .title-block h1 { font-size: 26px; letter-spacing: 1px; }
+  .title-block p { font-size: 13px; opacity: .8; margin-top: 2px; }
+  .badge { margin-left: auto; background: var(--yellow); color: #333; font-weight: 700;
+           padding: 6px 14px; border-radius: 20px; font-size: 13px; white-space: nowrap; }
+
+  /* ── Layout ── */
+  main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px 32px; max-width: 1400px; margin: 0 auto; }
+  section { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+  section.full { grid-column: 1 / -1; }
+  h2 { font-size: 15px; color: var(--navy); border-bottom: 2px solid var(--blue); padding-bottom: 8px; margin-bottom: 16px;
+       text-transform: uppercase; letter-spacing: .8px; display: flex; align-items: center; gap: 8px; }
+  h2 .icon { font-size: 18px; }
+
+  /* ── Physical Node SVG ── */
+  .node-svg-wrap { display: flex; justify-content: center; }
+  svg text { font-family: 'Segoe UI', Arial, sans-serif; }
+
+  /* ── Wiring table ── */
+  .wiring-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .wiring-table th { background: var(--blue); color: #fff; padding: 7px 10px; text-align: left; }
+  .wiring-table td { padding: 6px 10px; border-bottom: 1px solid #e0e8f0; }
+  .wiring-table tr:hover td { background: #f0f7ff; }
+  .pin-badge { display: inline-block; background: #e8f0fe; color: var(--navy);
+               border-radius: 4px; padding: 1px 7px; font-size: 11px; font-weight: 600; font-family: monospace; }
+  .wire-red { color: var(--red); font-weight: 700; }
+  .wire-black { color: #333; font-weight: 700; }
+  .wire-yellow { color: #B07800; font-weight: 700; }
+  .wire-blue { color: var(--blue); font-weight: 700; }
+  .wire-green { color: var(--green); font-weight: 700; }
+
+  /* ── BOM table ── */
+  .bom-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .bom-table th { background: var(--navy); color: #fff; padding: 7px 10px; text-align: left; }
+  .bom-table td { padding: 6px 10px; border-bottom: 1px solid #e0e8f0; }
+  .bom-table tr:hover td { background: #f0f7ff; }
+  .cost { font-weight: 700; color: var(--green); }
+  .total-row td { background: #e8f4ec; font-weight: 700; color: var(--green); font-size: 14px; }
+
+  /* ── System Architecture ── */
+  .arch-svg-wrap { display: flex; justify-content: center; overflow-x: auto; }
+
+  /* ── Specs grid ── */
+  .specs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .spec-card { background: var(--bg); border-radius: 8px; padding: 14px; border-left: 4px solid var(--blue); }
+  .spec-card.red { border-left-color: var(--red); }
+  .spec-card.green { border-left-color: var(--green); }
+  .spec-card.orange { border-left-color: var(--orange); }
+  .spec-card.teal { border-left-color: var(--teal); }
+  .spec-card.yellow { border-left-color: var(--yellow); }
+  .spec-label { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: .6px; }
+  .spec-value { font-size: 18px; font-weight: 700; color: var(--navy); margin: 4px 0; }
+  .spec-sub { font-size: 11px; color: var(--muted); }
+
+  /* ── Footer ── */
+  footer { text-align: center; padding: 16px; font-size: 12px; color: var(--muted); background: #e4eaf2; margin-top: 8px; }
+
+  /* ── Power flow ── */
+  .power-flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+  .pf-box { background: var(--navy); color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; text-align: center; min-width: 90px; }
+  .pf-arrow { font-size: 20px; color: var(--blue); padding: 0 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">💧</div>
+  <div class="title-block">
+    <h1>JalNaadi · Hardware Prototype</h1>
+    <p>Smart India Hackathon 2026 · SIH-26254 · Ministry of Jal Shakti (NJJM) · Team SolveX TSDCEM (ID 128664)</p>
+  </div>
+  <div class="badge">NAADI-EAR · NAADI-GATE · NAADI-DESK</div>
+</header>
+
+<main>
+
+  <!-- ── Physical Node Diagram ── -->
+  <section>
+    <h2><span class="icon">🔩</span> NAADI-EAR Node — Physical Assembly</h2>
+    <div class="node-svg-wrap">
+      <svg width="460" height="420" viewBox="0 0 460 420" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Pipe -->
+        <rect x="10" y="290" width="440" height="50" rx="6" fill="#5B9BD5" stroke="#2E75B6" stroke-width="2"/>
+        <text x="230" y="321" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Water Pipeline (PVC/DI, 50–150 mm dia.)</text>
+
+        <!-- Pipe flow arrow -->
+        <text x="60" y="271" fill="#2E75B6" font-size="11">Water flow →</text>
+        <path d="M120,265 L150,265" stroke="#2E75B6" stroke-width="2" marker-end="url(#arrow-blue)"/>
+
+        <!-- Hose clamp -->
+        <rect x="185" y="283" width="90" height="64" rx="3" fill="none" stroke="#555" stroke-width="2.5" stroke-dasharray="6,3"/>
+        <text x="230" y="358" text-anchor="middle" fill="#555" font-size="10">hose clamp + rubber pad</text>
+
+        <!-- IP67 Box -->
+        <rect x="155" y="130" width="150" height="110" rx="10" fill="#607D8B" stroke="#37474F" stroke-width="2.5"/>
+        <rect x="162" y="137" width="136" height="96" rx="7" fill="#455A64"/>
+        <!-- Box label -->
+        <text x="230" y="158" text-anchor="middle" fill="#CFD8DC" font-size="10" font-weight="bold">IP67 ABS Enclosure</text>
+        <text x="230" y="170" text-anchor="middle" fill="#90A4AE" font-size="9">~100 × 70 × 50 mm</text>
+
+        <!-- ESP32 inside box -->
+        <rect x="168" y="178" width="54" height="36" rx="4" fill="#2E7D32" stroke="#1B5E20" stroke-width="1.5"/>
+        <text x="195" y="191" text-anchor="middle" fill="white" font-size="7.5" font-weight="bold">ESP32</text>
+        <text x="195" y="201" text-anchor="middle" fill="#A5D6A7" font-size="7">WROVER-E</text>
+        <text x="195" y="210" text-anchor="middle" fill="#A5D6A7" font-size="6.5">8MB PSRAM</text>
+
+        <!-- SX1276 inside box -->
+        <rect x="232" y="178" width="54" height="36" rx="4" fill="#1565C0" stroke="#0D47A1" stroke-width="1.5"/>
+        <text x="259" y="191" text-anchor="middle" fill="white" font-size="7.5" font-weight="bold">SX1276</text>
+        <text x="259" y="201" text-anchor="middle" fill="#90CAF9" font-size="7">LoRa 866MHz</text>
+        <text x="259" y="210" text-anchor="middle" fill="#90CAF9" font-size="6.5">125kHz BW / SF9</text>
+
+        <!-- ADXL345 below ESP32 -->
+        <rect x="168" y="220" width="50" height="26" rx="3" fill="#C62828" stroke="#B71C1C" stroke-width="1.5"/>
+        <text x="193" y="232" text-anchor="middle" fill="white" font-size="7.5" font-weight="bold">ADXL345</text>
+        <text x="193" y="241" text-anchor="middle" fill="#FFCDD2" font-size="6.5">3200 Hz / SPI</text>
+
+        <!-- 18650 cell -->
+        <rect x="232" y="220" width="36" height="22" rx="4" fill="#E65100" stroke="#BF360C" stroke-width="1.5"/>
+        <text x="250" y="231" text-anchor="middle" fill="white" font-size="7" font-weight="bold">18650</text>
+        <text x="250" y="239" text-anchor="middle" fill="#FFCCBC" font-size="6">3.7V 3Ah</text>
+
+        <!-- TP4056 -->
+        <rect x="273" y="220" width="26" height="22" rx="3" fill="#6A1B9A" stroke="#4A148C" stroke-width="1.5"/>
+        <text x="286" y="231" text-anchor="middle" fill="white" font-size="6.5" font-weight="bold">TP</text>
+        <text x="286" y="239" text-anchor="middle" fill="#E1BEE7" font-size="6">4056</text>
+
+        <!-- Wire from box down to clamp -->
+        <line x1="200" y1="240" x2="200" y2="283" stroke="#FFEB3B" stroke-width="2" stroke-dasharray="4,2"/>
+        <text x="170" y="270" fill="#B07800" font-size="9">signal wires</text>
+
+        <!-- Solar Panel on top -->
+        <rect x="170" y="50" width="120" height="65" rx="6" fill="#1a237e" stroke="#283593" stroke-width="2"/>
+        <!-- solar cells grid -->
+        <line x1="210" y1="50" x2="210" y2="115" stroke="#3949AB" stroke-width="1"/>
+        <line x1="250" y1="50" x2="250" y2="115" stroke="#3949AB" stroke-width="1"/>
+        <line x1="170" y1="72" x2="290" y2="72" stroke="#3949AB" stroke-width="1"/>
+        <line x1="170" y1="94" x2="290" y2="94" stroke="#3949AB" stroke-width="1"/>
+        <text x="230" y="130" text-anchor="middle" fill="#64B5F6" font-size="9" font-weight="bold">Solar Panel 1W / 5V</text>
+        <!-- Solar wire -->
+        <line x1="230" y1="115" x2="230" y2="130" stroke="#FF5722" stroke-width="2"/>
+
+        <!-- LoRa Antenna on the right of box -->
+        <line x1="305" y1="185" x2="340" y2="100" stroke="#78909C" stroke-width="3"/>
+        <line x1="335" y1="95" x2="345" y2="95" stroke="#78909C" stroke-width="3"/>
+        <line x1="335" y1="102" x2="345" y2="102" stroke="#78909C" stroke-width="3"/>
+        <line x1="335" y1="109" x2="345" y2="109" stroke="#78909C" stroke-width="3"/>
+        <line x1="335" y1="116" x2="345" y2="116" stroke="#78909C" stroke-width="3"/>
+        <text x="355" y="110" fill="#546E7A" font-size="9" font-weight="bold">866 MHz</text>
+        <text x="355" y="121" fill="#546E7A" font-size="9">Antenna</text>
+
+        <!-- Wireless LoRa signal waves -->
+        <text x="375" y="80" fill="#0070C0" font-size="16" opacity=".6">))))</text>
+        <text x="390" y="85" fill="#0070C0" font-size="11" opacity=".4">LoRa</text>
+
+        <!-- Labels on the left -->
+        <line x1="155" y1="155" x2="90" y2="130" stroke="#90A4AE" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="88" y="128" text-anchor="end" fill="#37474F" font-size="10" font-weight="bold">IP67 Enclosure</text>
+
+        <line x1="168" y1="195" x2="100" y2="195" stroke="#90A4AE" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="98" y="198" text-anchor="end" fill="#2E7D32" font-size="10" font-weight="bold">ESP32-WROVER-E</text>
+
+        <line x1="168" y1="232" x2="100" y2="232" stroke="#90A4AE" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="98" y="235" text-anchor="end" fill="#C62828" font-size="10" font-weight="bold">ADXL345</text>
+
+        <line x1="232" y1="195" x2="370" y2="195" stroke="#90A4AE" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="372" y="198" fill="#1565C0" font-size="10" font-weight="bold">SX1276 LoRa</text>
+
+        <line x1="268" y1="232" x2="370" y2="232" stroke="#90A4AE" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="372" y="235" fill="#E65100" font-size="10" font-weight="bold">18650 + TP4056</text>
+
+        <line x1="230" y1="130" x2="120" y2="50" stroke="#90A4AE" stroke-width="1" stroke-dasharray="3,2"/>
+        <text x="118" y="48" text-anchor="end" fill="#1a237e" font-size="10" font-weight="bold">1W Solar Panel</text>
+
+        <!-- Clamp arrows label -->
+        <text x="10" y="360" fill="#37474F" font-size="9">← rubber pad + hose clamp</text>
+
+        <!-- Cost badge -->
+        <rect x="320" y="370" width="130" height="38" rx="6" fill="#21A64F"/>
+        <text x="385" y="386" text-anchor="middle" fill="white" font-size="11" font-weight="bold">Node cost</text>
+        <text x="385" y="401" text-anchor="middle" fill="white" font-size="13" font-weight="bold">≈ ₹2,970</text>
+
+        <!-- Arrow marker -->
+        <defs>
+          <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#2E75B6"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ── Key Specs ── -->
+  <section>
+    <h2><span class="icon">⚡</span> Key Specifications</h2>
+    <div class="specs-grid">
+      <div class="spec-card">
+        <div class="spec-label">MCU</div>
+        <div class="spec-value">ESP32-WROVER-E</div>
+        <div class="spec-sub">240 MHz dual-core · 8 MB PSRAM · Wi-Fi + BT</div>
+      </div>
+      <div class="spec-card red">
+        <div class="spec-label">Vibration Sensor</div>
+        <div class="spec-value">ADXL345 / ADXL355</div>
+        <div class="spec-sub">3200 Hz ODR · SPI @ 5 MHz · 13-bit, ±16g</div>
+      </div>
+      <div class="spec-card teal">
+        <div class="spec-label">Radio</div>
+        <div class="spec-value">SX1276 LoRa</div>
+        <div class="spec-sub">866 MHz · 125 kHz BW · SF9 · 14 dBm · DoT licensed</div>
+      </div>
+      <div class="spec-card orange">
+        <div class="spec-label">Power</div>
+        <div class="spec-value">18650 + 1W Solar</div>
+        <div class="spec-sub">Solar charged · TP4056 controller · deep-sleep 0.15 mA</div>
+      </div>
+      <div class="spec-card green">
+        <div class="spec-label">Sampling Rate</div>
+        <div class="spec-value">3,200 Hz</div>
+        <div class="spec-sub">10 s burst · 32,000 samples · 8-bit quantised for TX</div>
+      </div>
+      <div class="spec-card yellow">
+        <div class="spec-label">Enclosure</div>
+        <div class="spec-value">IP67 ABS</div>
+        <div class="spec-sub">Rubber pad + hose clamp · cable gland · field-deployable</div>
+      </div>
+      <div class="spec-card">
+        <div class="spec-label">Location Accuracy</div>
+        <div class="spec-value">≈ 0.06 m RMS</div>
+        <div class="spec-sub">GCC-PHAT + One-Tap calibration · sync residual &lt; 0.3 ms</div>
+      </div>
+      <div class="spec-card red">
+        <div class="spec-label">Wake Interval</div>
+        <div class="spec-value">15 min</div>
+        <div class="spec-sub">96 wake-checks / day · &lt; 20 s active per cycle</div>
+      </div>
+      <div class="spec-card teal">
+        <div class="spec-label">Peer Sync</div>
+        <div class="spec-value">ESP-NOW</div>
+        <div class="spec-sub">2.4 GHz Wi-Fi LAN · burst exchange &lt; 250 B chunks · &lt; 3 s</div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:20px"><span class="icon">🔋</span> Power Chain</h2>
+    <div class="power-flow">
+      <div class="pf-box">☀️ Solar<br><small>1W / 5V</small></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-box">TP4056<br><small>Charger</small></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-box">18650<br><small>3.7V / 3Ah</small></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-box">3.3V Reg<br><small>Low-Iq</small></div>
+      <div class="pf-arrow">→</div>
+      <div class="pf-box">ESP32<br><small>+ Peripherals</small></div>
+    </div>
+  </section>
+
+  <!-- ── Wiring Table ── -->
+  <section>
+    <h2><span class="icon">🔌</span> Wiring — ESP32-WROVER-E Pin Map</h2>
+    <table class="wiring-table">
+      <thead><tr><th>Signal</th><th>ESP32 Pin</th><th>Bus</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>ADXL345 CS</td>
+          <td><span class="pin-badge">GPIO 5</span></td>
+          <td><span class="wire-yellow">VSPI</span></td>
+          <td>Chip select — accelerometer</td>
+        </tr>
+        <tr>
+          <td>ADXL345 SCK</td>
+          <td><span class="pin-badge">GPIO 18</span></td>
+          <td><span class="wire-yellow">VSPI</span></td>
+          <td>SPI clock 5 MHz, MODE3</td>
+        </tr>
+        <tr>
+          <td>ADXL345 MISO</td>
+          <td><span class="pin-badge">GPIO 19</span></td>
+          <td><span class="wire-yellow">VSPI</span></td>
+          <td>Data: sensor → ESP32</td>
+        </tr>
+        <tr>
+          <td>ADXL345 MOSI</td>
+          <td><span class="pin-badge">GPIO 23</span></td>
+          <td><span class="wire-yellow">VSPI</span></td>
+          <td>Data: ESP32 → sensor (config)</td>
+        </tr>
+        <tr>
+          <td>SX1276 CS</td>
+          <td><span class="pin-badge">GPIO 15</span></td>
+          <td><span class="wire-blue">HSPI</span></td>
+          <td>Chip select — LoRa module</td>
+        </tr>
+        <tr>
+          <td>SX1276 SCK</td>
+          <td><span class="pin-badge">GPIO 14</span></td>
+          <td><span class="wire-blue">HSPI</span></td>
+          <td>SPI clock</td>
+        </tr>
+        <tr>
+          <td>SX1276 MISO</td>
+          <td><span class="pin-badge">GPIO 12</span></td>
+          <td><span class="wire-blue">HSPI</span></td>
+          <td>Data: LoRa → ESP32</td>
+        </tr>
+        <tr>
+          <td>SX1276 MOSI</td>
+          <td><span class="pin-badge">GPIO 13</span></td>
+          <td><span class="wire-blue">HSPI</span></td>
+          <td>Data: ESP32 → LoRa</td>
+        </tr>
+        <tr>
+          <td>SX1276 DIO0</td>
+          <td><span class="pin-badge">GPIO 26</span></td>
+          <td><span class="wire-green">IRQ</span></td>
+          <td>RxDone interrupt — beacon timestamp (IRAM ISR)</td>
+        </tr>
+        <tr>
+          <td>SX1276 RST</td>
+          <td><span class="pin-badge">GPIO 25</span></td>
+          <td><span class="wire-green">GPIO</span></td>
+          <td>Hardware reset</td>
+        </tr>
+        <tr>
+          <td>GATE Flow Pulse</td>
+          <td><span class="pin-badge">GPIO 27</span></td>
+          <td><span class="wire-green">GPIO</span></td>
+          <td>Hall sensor, internal pull-up (NAADI-GATE only)</td>
+        </tr>
+        <tr>
+          <td>GATE Pressure</td>
+          <td><span class="pin-badge">GPIO 34</span></td>
+          <td><span class="wire-red">ADC1</span></td>
+          <td>0.5–4.5 V transducer via voltage divider</td>
+        </tr>
+        <tr>
+          <td>VCC (3.3 V)</td>
+          <td><span class="pin-badge">3V3</span></td>
+          <td><span class="wire-red">PWR</span></td>
+          <td>From low-Iq regulator, NOT USB chip in field</td>
+        </tr>
+        <tr>
+          <td>GND</td>
+          <td><span class="pin-badge">GND</span></td>
+          <td><span class="wire-black">GND</span></td>
+          <td>Common ground plane</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── BOM ── -->
+  <section>
+    <h2><span class="icon">🛒</span> Bill of Materials — Per Node</h2>
+    <table class="bom-table">
+      <thead><tr><th>#</th><th>Component</th><th>Qty</th><th>Cost (₹)</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>ESP32-WROVER-E module</td><td>1</td><td class="cost">650</td><td>8 MB PSRAM for burst storage</td></tr>
+        <tr><td>2</td><td>SX1276 LoRa module (865–867 MHz)</td><td>1</td><td class="cost">700</td><td>Antenna tuned 866 MHz</td></tr>
+        <tr><td>3</td><td>ADXL345 breakout (prototype)</td><td>1</td><td class="cost">300</td><td>ADXL355 for field: ₹3,000</td></tr>
+        <tr><td>4</td><td>18650 Li-ion cell + holder</td><td>1</td><td class="cost">350</td><td>~3 Ah capacity</td></tr>
+        <tr><td>5</td><td>TP4056 solar charge controller</td><td>1</td><td class="cost">120</td><td>USB-C input compatible</td></tr>
+        <tr><td>6</td><td>Solar panel 1W / 5V</td><td>1</td><td class="cost">300</td><td>Mini monocrystalline</td></tr>
+        <tr><td>7</td><td>IP67 ABS enclosure + cable gland</td><td>1</td><td class="cost">300</td><td>~100×70×50 mm</td></tr>
+        <tr><td>8</td><td>Hose clamp + rubber pad</td><td>1</td><td class="cost">150</td><td>Pipe coupling / mechanical mount</td></tr>
+        <tr><td>9</td><td>INA219 current monitor (test only)</td><td>1</td><td class="cost">150</td><td>Power budget verification</td></tr>
+        <tr><td>10</td><td>Wiring, connectors, 866 MHz antenna</td><td>1</td><td class="cost">150</td><td>SMA pigtail, JST connectors</td></tr>
+        <tr class="total-row"><td colspan="3">✅ Total per node (ADXL345 prototype)</td><td class="cost">₹ 2,970</td><td>Field version with ADXL355: ≈ ₹5,670</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── System Architecture Diagram ── -->
+  <section class="full">
+    <h2><span class="icon">🏗️</span> Full System Architecture — Field Deployment</h2>
+    <div class="arch-svg-wrap">
+      <svg width="1100" height="280" viewBox="0 0 1100 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#546E7A"/>
+          </marker>
+          <marker id="arr-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#1565C0"/>
+          </marker>
+          <marker id="arr-green" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#21A64F"/>
+          </marker>
+          <marker id="arr-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#E65100"/>
+          </marker>
+        </defs>
+
+        <!-- Background zones -->
+        <rect x="5" y="10" width="330" height="260" rx="12" fill="#E3F2FD" stroke="#90CAF9" stroke-width="1.5"/>
+        <text x="170" y="28" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">🌍 Field — Pipeline Zone</text>
+
+        <rect x="360" y="10" width="200" height="260" rx="12" fill="#E8F5E9" stroke="#A5D6A7" stroke-width="1.5"/>
+        <text x="460" y="28" text-anchor="middle" font-size="11" font-weight="bold" fill="#2E7D32">📡 Gateway</text>
+
+        <rect x="580" y="10" width="210" height="260" rx="12" fill="#FFF8E1" stroke="#FFE082" stroke-width="1.5"/>
+        <text x="685" y="28" text-anchor="middle" font-size="11" font-weight="bold" fill="#F57F17">☁️ Cloud / Backend</text>
+
+        <rect x="810" y="10" width="280" height="260" rx="12" fill="#FCE4EC" stroke="#F48FB1" stroke-width="1.5"/>
+        <text x="950" y="28" text-anchor="middle" font-size="11" font-weight="bold" fill="#C62828">🖥️ NAADI-DESK</text>
+
+        <!-- NAADI-EAR Node A -->
+        <rect x="20" y="50" width="110" height="90" rx="8" fill="#1565C0" stroke="#0D47A1" stroke-width="2"/>
+        <text x="75" y="72" text-anchor="middle" fill="white" font-size="11" font-weight="bold">NAADI-EAR</text>
+        <text x="75" y="85" text-anchor="middle" fill="#90CAF9" font-size="10">Node A (Slave)</text>
+        <text x="75" y="98" text-anchor="middle" fill="#64B5F6" font-size="9">ESP32 + ADXL345</text>
+        <text x="75" y="110" text-anchor="middle" fill="#64B5F6" font-size="9">SX1276 LoRa</text>
+        <text x="75" y="122" text-anchor="middle" fill="#64B5F6" font-size="9">☀️ Solar + 18650</text>
+
+        <!-- NAADI-EAR Node B -->
+        <rect x="155" y="50" width="110" height="90" rx="8" fill="#1565C0" stroke="#0D47A1" stroke-width="2"/>
+        <text x="210" y="72" text-anchor="middle" fill="white" font-size="11" font-weight="bold">NAADI-EAR</text>
+        <text x="210" y="85" text-anchor="middle" fill="#90CAF9" font-size="10">Node B (Master)</text>
+        <text x="210" y="98" text-anchor="middle" fill="#64B5F6" font-size="9">ESP32 + ADXL345</text>
+        <text x="210" y="110" text-anchor="middle" fill="#64B5F6" font-size="9">SX1276 LoRa</text>
+        <text x="210" y="122" text-anchor="middle" fill="#64B5F6" font-size="9">☀️ Solar + 18650</text>
+
+        <!-- ESP-NOW arrow between nodes -->
+        <path d="M130,95 L155,95" stroke="#FF6F00" stroke-width="2" stroke-dasharray="4,2" marker-end="url(#arr-orange)"/>
+        <text x="142" y="88" text-anchor="middle" fill="#E65100" font-size="8" font-weight="bold">ESP-NOW</text>
+        <text x="142" y="78" text-anchor="middle" fill="#E65100" font-size="7">burst chunks</text>
+
+        <!-- Pipe below nodes -->
+        <rect x="20" y="155" width="310" height="22" rx="4" fill="#5B9BD5" stroke="#2E75B6" stroke-width="1.5"/>
+        <text x="175" y="170" text-anchor="middle" fill="white" font-size="9" font-weight="bold">Water Pipeline</text>
+
+        <!-- Node A down to pipe -->
+        <line x1="75" y1="140" x2="75" y2="155" stroke="#78909C" stroke-width="2" stroke-dasharray="3,2"/>
+        <line x1="210" y1="140" x2="210" y2="155" stroke="#78909C" stroke-width="2" stroke-dasharray="3,2"/>
+        <!-- leak marker on pipe -->
+        <circle cx="142" cy="166" r="7" fill="#C62828" stroke="white" stroke-width="1.5"/>
+        <text x="142" y="170" text-anchor="middle" fill="white" font-size="9" font-weight="bold">!</text>
+        <text x="142" y="185" text-anchor="middle" fill="#C62828" font-size="8">Leak @ x m</text>
+
+        <!-- NAADI-GATE -->
+        <rect x="155" y="200" width="110" height="55" rx="8" fill="#00796B" stroke="#004D40" stroke-width="2"/>
+        <text x="210" y="220" text-anchor="middle" fill="white" font-size="11" font-weight="bold">NAADI-GATE</text>
+        <text x="210" y="233" text-anchor="middle" fill="#B2DFDB" font-size="9">Flow + Pressure</text>
+        <text x="210" y="244" text-anchor="middle" fill="#B2DFDB" font-size="9">Hall + ADC · CUSUM</text>
+
+        <!-- GCC-PHAT formula -->
+        <text x="75" y="200" fill="#1565C0" font-size="9" font-weight="bold">GCC-PHAT:</text>
+        <text x="75" y="213" fill="#546E7A" font-size="8.5">x = (L − v·τ) / 2</text>
+        <text x="75" y="225" fill="#546E7A" font-size="8">One-Tap: v = L/Δt</text>
+
+        <!-- LoRa to gateway -->
+        <path d="M265,95 Q310,95 360,140" stroke="#546E7A" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arr)"/>
+        <text x="310" y="80" fill="#546E7A" font-size="9">LoRa 866 MHz</text>
+
+        <!-- GATE LoRa to gateway -->
+        <path d="M265,225 Q330,225 360,190" stroke="#546E7A" stroke-width="2" stroke-dasharray="5,3" fill="none" marker-end="url(#arr)"/>
+
+        <!-- Gateway box -->
+        <rect x="375" y="60" width="170" height="160" rx="8" fill="#2E7D32" stroke="#1B5E20" stroke-width="2"/>
+        <text x="460" y="80" text-anchor="middle" fill="white" font-size="11" font-weight="bold">LoRa Gateway</text>
+        <text x="460" y="95" text-anchor="middle" fill="#A5D6A7" font-size="9">ESP32 / RPi</text>
+        <text x="460" y="110" text-anchor="middle" fill="#A5D6A7" font-size="9">SX1276 multi-channel</text>
+        <text x="460" y="130" text-anchor="middle" fill="#C8E6C9" font-size="9">▸ Receive LoRa packets</text>
+        <text x="460" y="143" text-anchor="middle" fill="#C8E6C9" font-size="9">▸ Validate + timestamp</text>
+        <text x="460" y="156" text-anchor="middle" fill="#C8E6C9" font-size="9">▸ MQTT-TLS publish</text>
+        <text x="460" y="169" text-anchor="middle" fill="#C8E6C9" font-size="9">▸ 4G / Wi-Fi uplink</text>
+        <text x="460" y="188" text-anchor="middle" fill="#81C784" font-size="8">Gateway also sends beacon</text>
+        <text x="460" y="200" text-anchor="middle" fill="#81C784" font-size="8">every 15 min to wake nodes</text>
+
+        <!-- Gateway to cloud -->
+        <path d="M545,140 L580,140" stroke="#1565C0" stroke-width="2" marker-end="url(#arr-blue)"/>
+        <text x="562" y="133" text-anchor="middle" fill="#1565C0" font-size="9" font-weight="bold">MQTT-TLS</text>
+
+        <!-- Cloud backend -->
+        <rect x="593" y="50" width="184" height="190" rx="8" fill="#F57F17" stroke="#E65100" stroke-width="2"/>
+        <text x="685" y="70" text-anchor="middle" fill="white" font-size="11" font-weight="bold">FastAPI Backend</text>
+        <text x="685" y="85" text-anchor="middle" fill="#FFF9C4" font-size="9">app.py + SQLite</text>
+        <text x="685" y="106" text-anchor="middle" fill="white" font-size="9" font-weight="bold">Endpoints:</text>
+        <text x="685" y="120" text-anchor="middle" fill="#FFF9C4" font-size="9">POST /ingest → parse payload</text>
+        <text x="685" y="133" text-anchor="middle" fill="#FFF9C4" font-size="9">GET  /leaks  → ranked list</text>
+        <text x="685" y="146" text-anchor="middle" fill="#FFF9C4" font-size="9">GET  /zones  → zone status</text>
+        <text x="685" y="159" text-anchor="middle" fill="#FFF9C4" font-size="9">POST /repair → mark fixed</text>
+        <text x="685" y="178" text-anchor="middle" fill="white" font-size="9" font-weight="bold">Priority Engine:</text>
+        <text x="685" y="191" text-anchor="middle" fill="#FFF9C4" font-size="9">score = loss_lpd × households</text>
+        <text x="685" y="204" text-anchor="middle" fill="#FFF9C4" font-size="9">SMS alert via Twilio/D7</text>
+        <text x="685" y="217" text-anchor="middle" fill="#FFF9C4" font-size="9">NJJM JSON payload format</text>
+
+        <!-- Cloud to desk -->
+        <path d="M777,140 L810,140" stroke="#21A64F" stroke-width="2" marker-end="url(#arr-green)"/>
+        <text x="793" y="133" text-anchor="middle" fill="#21A64F" font-size="9" font-weight="bold">REST API</text>
+
+        <!-- NAADI-DESK -->
+        <rect x="823" y="50" width="255" height="190" rx="8" fill="#C62828" stroke="#B71C1C" stroke-width="2"/>
+        <text x="950" y="70" text-anchor="middle" fill="white" font-size="11" font-weight="bold">NAADI-DESK Dashboard</text>
+        <text x="950" y="85" text-anchor="middle" fill="#FFCDD2" font-size="9">dashboard/index.html · Leaflet.js</text>
+        <text x="950" y="106" text-anchor="middle" fill="white" font-size="9" font-weight="bold">Features:</text>
+        <text x="950" y="120" text-anchor="middle" fill="#FFCDD2" font-size="9">🗺  Leak markers on OSM map</text>
+        <text x="950" y="133" text-anchor="middle" fill="#FFCDD2" font-size="9">📊  Priority-ranked repair table</text>
+        <text x="950" y="146" text-anchor="middle" fill="#FFCDD2" font-size="9">🚨  Colour-coded alert cards</text>
+        <text x="950" y="159" text-anchor="middle" fill="#FFCDD2" font-size="9">📱  SMS to field plumber team</text>
+        <text x="950" y="172" text-anchor="middle" fill="#FFCDD2" font-size="9">🔄  Auto-refresh every 15 s</text>
+        <text x="950" y="185" text-anchor="middle" fill="#FFCDD2" font-size="9">✅  Mark repair complete</text>
+        <text x="950" y="204" text-anchor="middle" fill="white" font-size="9" font-weight="bold">Users: JJM District Officer · Plumber</text>
+      </svg>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  JalNaadi · SIH-26254 · Team SolveX TSDCEM (ID 128664) · Ministry of Jal Shakti / NJJM ·
+  MIT Licence · Firmware: Arduino / ESP32 · Backend: Python / FastAPI · Radio: 865–867 MHz DoT delicensed band
+</footer>
+
+</body>
+</html>

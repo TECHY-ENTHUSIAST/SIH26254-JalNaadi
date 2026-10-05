@@ -12,7 +12,8 @@ JalNaadi tells you **where** the pipe is leaking.
 > problem, the physics and the design from scratch.
 
 ![prototype](docs/images/prototype.jpg)
-<!-- add your prototype photo as docs/images/prototype.jpg -->
+
+> 🔩 **Hardware Prototype Visual** — open [`docs/hardware_prototype.html`](docs/hardware_prototype.html) in a browser for the full interactive hardware schematic, wiring map, BOM, and system architecture diagram.
 
 ## How it works
 
