@@ -2,7 +2,7 @@
 
 **Smart India Hackathon 2026 · SIH26254 · Ministry of Jal Shakti (NJJM) · Hardware**
 *Development of Indigenous Leak Detection Sensor Systems for Operation & Maintenance of Water Supply Pipelines*
-Team **SolveX TSDCEM** (Team ID 128664)
+Team **SolverX** (Team ID 128664)
 
 JalNaadi ("pulse of the pipe") is a low-cost, solar-recharged system that **detects and locates leaks** in village and
 small-town water pipelines. Jal Jeevan Mission flow and pressure sensors tell you **that** a zone is losing water;
