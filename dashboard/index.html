@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JalNaadi DESK</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>body{font-family:Arial,sans-serif;margin:0}header{background:#1F4E79;color:#fff;padding:10px 16px;font-weight:700}
+#map{height:60vh}table{border-collapse:collapse;width:100%}th{background:#0070C0;color:#fff;text-align:left;padding:6px}td{padding:6px;border-bottom:1px solid #ddd}</style></head>
+<body><header>JalNaadi · NAADI-DESK — located leaks and repair priority</header><div id="map"></div>
+<table id="t"><thead><tr><th>#</th><th>Segment</th><th>Zone</th><th>Distance from node A (m)</th><th>Households</th><th>Loss (L/day)</th><th>Score</th></tr></thead><tbody></tbody></table>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const API = location.origin;                       // serve this file from the backend, or set the API URL here
+const map = L.map('map').setView([19.0, 72.0], 15);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+let layer = L.layerGroup().addTo(map);
+async function refresh(){
+  const leaks = await (await fetch(API + '/leaks')).json();
+  layer.clearLayers(); const tb = document.querySelector('#t tbody'); tb.innerHTML = '';
+  leaks.forEach((l,i)=>{
+    L.circleMarker([l.lat,l.lon],{radius:9,color:'#C01F1F',fillOpacity:.8}).bindPopup(`${l.seg}: ${l.x_m} m from A<br>${l.loss_lpd} L/day`).addTo(layer);
+    tb.insertAdjacentHTML('beforeend',`<tr><td>${i+1}</td><td>${l.seg}</td><td>${l.zone}</td><td>${l.x_m}</td><td>${l.households}</td><td>${l.loss_lpd}</td><td>${l.score}</td></tr>`);
+  });
+  if (leaks.length) map.setView([leaks[0].lat, leaks[0].lon], 17);
+}
+refresh(); setInterval(refresh, 15000);
+</script></body></html>

@@ -1,0 +1,68 @@
+{
+ "classifier": {
+  "accuracy": 100.0,
+  "confusion": [
+   [
+    300,
+    0,
+    0,
+    0
+   ],
+   [
+    0,
+    300,
+    0,
+    0
+   ],
+   [
+    0,
+    0,
+    300,
+    0
+   ],
+   [
+    0,
+    0,
+    0,
+    300
+   ]
+  ],
+  "classes": [
+   "leak",
+   "pump",
+   "tap",
+   "quiet"
+  ]
+ },
+ "gate": {
+  "0.1": {
+   "detected": 99.644128113879,
+   "median_delay": 2.0,
+   "p90_delay": 5.0,
+   "L_per_min": 1.7,
+   "L_per_day": 2400
+  },
+  "0.2": {
+   "detected": 100.0,
+   "median_delay": 0.0,
+   "p90_delay": 1.0,
+   "L_per_min": 3.3,
+   "L_per_day": 4800
+  },
+  "0.3": {
+   "detected": 100.0,
+   "median_delay": 0.0,
+   "p90_delay": 0.0,
+   "L_per_min": 5.0,
+   "L_per_day": 7200
+  },
+  "0.5": {
+   "detected": 100.0,
+   "median_delay": 0.0,
+   "p90_delay": 0.0,
+   "L_per_min": 8.3,
+   "L_per_day": 12000
+  },
+  "nights_per_false_alarm": 467.0
+ }
+}

@@ -1,0 +1,11 @@
+item,qty_per_node,indicative_cost_inr,note
+ESP32-WROVER-E module / dev board (8 MB PSRAM),1,650,pair copy of the burst needs PSRAM
+SX1276 LoRa module (865-867 MHz variant),1,700,antenna tuned for 866 MHz
+ADXL345 breakout (prototype) or ADXL355 (field),1,300 / 3000,both nodes of a pair must match
+18650 Li-ion cell + holder,1,350,
+TP4056 / solar charge controller,1,120,
+Solar panel 1 W / 5 V,1,300,
+IP67 enclosure + cable gland,1,300,
+Clamp / saddle + magnet or hose clamp + rubber pad,1,150,mechanical coupling to the pipe
+INA219 current monitor (test only),1,150,power budget verification on the rig
+Wiring / connectors / antenna,1,150,
